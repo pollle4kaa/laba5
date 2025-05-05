@@ -1,40 +1,29 @@
-# 5 Лабораторная работа "Многопоточность"
+п»ї#pragma once
+#include <vector>
+#include <cstdint>
+#include <iostream>
+#include <algorithm>
 
-## Структура проекта
-- image.hpp - Заголовочный файл
-- main.cpp - Основной файл
-- CMakeLists.txt - Файл для сборки проекта
-
-# Структура Color (Цвет одного конкретного пикселя)
-```
+// РЎС‚СЂСѓРєС‚СѓСЂР° РґР»СЏ РїСЂРµРґСЃС‚Р°РІР»РµРЅРёСЏ С†РІРµС‚Р° РїРёРєСЃРµР»СЏ (RGB)
 struct Color {
-    uint8_t r; // Красный (0-255)
-    uint8_t g; // Зеленый (0-255)
-    uint8_t b; // Синий (0-255)
+    uint8_t r; // РљСЂР°СЃРЅС‹Р№ (0-255)
+    uint8_t g; // Р—РµР»РµРЅС‹Р№ (0-255)
+    uint8_t b; // РЎРёРЅРёР№ (0-255)
 
-    // Конструктор по умолчанию (черный цвет)
+    // РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ (С‡РµСЂРЅС‹Р№ С†РІРµС‚)
     Color() : r(0), g(0), b(0) {}
 
-    // Конструктор с параметрами
+    // РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ СЃ РїР°СЂР°РјРµС‚СЂР°РјРё
     Color(uint8_t red, uint8_t green, uint8_t blue) : r(red), g(green), b(blue) {}
 };
-```
-- Каждый пиксель изображения имеет три цветовых канала: красный (R), зеленый (G) и синий (B)
-- uint8_t - тип данных для целых чисел от 0 до 255 (1 байт)
-- Конструкторы позволяют создавать цвет:
-1. По умолчанию - черный (0,0,0)
-2. С указанными значения RGB
 
-#Тип Image
-```
+// РўРёРї РґР»СЏ РїСЂРµРґСЃС‚Р°РІР»РµРЅРёСЏ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ
 using Image = std::vector<std::vector<Color>>;
-```
-- Изображение представляется в виде двумерного вектора цветов
-- Первый (внеш.) вектор - строки изображения
-- Второй (внутр.) - пиксели в строчке
 
-# Генерация рандомного изображения
-```
+#include <cstdlib>
+#include <ctime>
+
+// Р“РµРЅРµСЂР°С†РёСЏ СЃР»СѓС‡Р°Р№РЅРѕРіРѕ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ Р·Р°РґР°РЅРЅРѕРіРѕ СЂР°Р·РјРµСЂР°
 Image RandomImage(size_t width, size_t height) {
     Image image(height, std::vector<Color>(width));
     std::srand(std::time(0));
@@ -45,25 +34,21 @@ Image RandomImage(size_t width, size_t height) {
     }
     return image;
 }
-```
-- Создается изображение введенного размера
-- std::srand(std::time(0)); - генератор псевдослучайных чисел (текущее время)
-- Двойной цикл заполняет каждый пиксель случайным цветом
-- Функция возвращает готовое изображение
 
-# Размытие одного конкретного пикселя
-```
+#include <numeric>
+
+// Р¤СѓРЅРєС†РёСЏ РґР»СЏ РїРѕР»СѓС‡РµРЅРёСЏ СЃСЂРµРґРЅРµРіРѕ С†РІРµС‚Р° РІ РѕРєСЂРµСЃС‚РЅРѕСЃС‚Рё 3x3
 Color averageColor(const Image& image, int x, int y) {
     int sum_r = 0, sum_g = 0, sum_b = 0;
     int count = 0;
 
-    // Проверяем соседние пиксели в окрестности 3x3
+    // РџСЂРѕРІРµСЂСЏРµРј СЃРѕСЃРµРґРЅРёРµ РїРёРєСЃРµР»Рё РІ РѕРєСЂРµСЃС‚РЅРѕСЃС‚Рё 3x3
     for (int dy = -1; dy <= 1; ++dy) {
         for (int dx = -1; dx <= 1; ++dx) {
             int nx = x + dx;
             int ny = y + dy;
 
-            // Проверяем, что координаты внутри изображения
+            // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РєРѕРѕСЂРґРёРЅР°С‚С‹ РІРЅСѓС‚СЂРё РёР·РѕР±СЂР°Р¶РµРЅРёСЏ
             if (nx >= 0 && ny >= 0 && nx < image[0].size() && ny < image.size()) {
                 sum_r += image[ny][nx].r;
                 sum_g += image[ny][nx].g;
@@ -73,21 +58,14 @@ Color averageColor(const Image& image, int x, int y) {
         }
     }
 
-    // Вычисляем средние значения
+    // Р’С‹С‡РёСЃР»СЏРµРј СЃСЂРµРґРЅРёРµ Р·РЅР°С‡РµРЅРёСЏ
     return Color(static_cast<uint8_t>(sum_r/count),static_cast<uint8_t>(sum_g/count),static_cast<uint8_t>(sum_b/count));
 }
-```
-- Функция принимает изображение и координаты пикселя (x,y)
-- Складывает отдельно каждый цветовой канал
-- Двойной цикл проверяет 8 соседних пикселей (3x3) + с сам пиксель
-- Есть проверка на границы изображения, чтобы не выйти за пределы
-- Вычисляется среднее значение для каждого канала и возвращается новый цвет - результат размытия
 
-# Последовательное размытие
-```
+// РџРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕРµ СЂР°Р·РјС‹С‚РёРµ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ
 Image sequentialBlur(const Image& input) {
-    Image output = input; // Создаем копию для результата
-    // Проходим по всем пикселям изображения
+    Image output = input; // РЎРѕР·РґР°РµРј РєРѕРїРёСЋ РґР»СЏ СЂРµР·СѓР»СЊС‚Р°С‚Р°
+    // РџСЂРѕС…РѕРґРёРј РїРѕ РІСЃРµРј РїРёРєСЃРµР»СЏРј РёР·РѕР±СЂР°Р¶РµРЅРёСЏ
     for (size_t y = 0; y < input.size(); ++y) {
         for (size_t x = 0; x < input[y].size(); ++x) {
             output[y][x] = averageColor(input, x, y);
@@ -95,20 +73,18 @@ Image sequentialBlur(const Image& input) {
     }
     return output;
 }
-```
-- Создание копии изображения для рез-а
-- С помощью двойного цикла проходимся по каждому пикселю, вызываем для него функцию размытия
-- Результат размытия записываем в копию и возвращает размытое изображение
 
-# Параллельное размытие с использованием потоков
-```
+#include <thread>
+#include <mutex>
+
+// РџР°СЂР°Р»Р»РµР»СЊРЅРѕРµ СЂР°Р·РјС‹С‚РёРµ СЃ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРµРј std::thread
 Image parallel(const Image& input, int num_threads = 4) {
     Image output = input;
     std::vector<std::thread> threads;
     int height = input.size();
     int strip_height = height/num_threads;
 
-    // Функция, которую будет выполнять каждый поток
+    // Р¤СѓРЅРєС†РёСЏ, РєРѕС‚РѕСЂСѓСЋ Р±СѓРґРµС‚ РІС‹РїРѕР»РЅСЏС‚СЊ РєР°Р¶РґС‹Р№ РїРѕС‚РѕРє
     auto blur_task = [&](int start_y, int end_y) {
         for (int y = start_y; y < end_y; ++y) {
             for (size_t x = 0; x < input[y].size(); ++x) {
@@ -117,7 +93,7 @@ Image parallel(const Image& input, int num_threads = 4) {
         }
         };
 
-    // Создаем потоки
+    // РЎРѕР·РґР°РµРј РїРѕС‚РѕРєРё
     for (int i = 0; i < num_threads; ++i) {
         int start_y = i * strip_height;
         int end_y = (i == num_threads - 1) ? height : (i + 1) * strip_height;
@@ -125,25 +101,17 @@ Image parallel(const Image& input, int num_threads = 4) {
         threads.emplace_back(blur_task, start_y, end_y);
     }
 
-    // Ожидаем завершения всех потоков
+    // РћР¶РёРґР°РµРј Р·Р°РІРµСЂС€РµРЅРёСЏ РІСЃРµС… РїРѕС‚РѕРєРѕРІ
     for (auto& thread : threads) {
         thread.join();
     }
 
     return output;
 }
-```
-- Создание копии изображения для результатов
-- Создание вектора для хранения потоков
-- Вычисление высоты полосы для каждого потока
-- Лямбда-функция blur_task, которая обрабатывает свою часть изображения
- - Создание потоков:
-1. Каждый поток получает свой диапазон строк (start_y, end_y)
-2. Последний поток обрабатывает оставшиеся строки
-3. Ожидание завершения всех потоков (thread.join())
 
-# Измерение времени выполнения
-```
+#include <chrono>
+
+// Р¤СѓРЅРєС†РёСЏ РґР»СЏ РёР·РјРµСЂРµРЅРёСЏ РІСЂРµРјРµРЅРё РІС‹РїРѕР»РЅРµРЅРёСЏ
 template<typename Func>
 void measureTime(const std::string& name, Func func) {
     auto start = std::chrono::high_resolution_clock::now();
@@ -152,15 +120,15 @@ void measureTime(const std::string& name, Func func) {
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     std::cout << name << " took " << duration.count() << " ms\n";
 }
-```
 
-# Пример с атомарными операциями
-```
+#include <atomic>
+
+// РџСЂРёРјРµСЂ СЃ Р°С‚РѕРјР°СЂРЅС‹РјРё РѕРїРµСЂР°С†РёСЏРјРё
 void atomicExample() {
     const int num_iterations = 1000000;
     const int num_threads = 4;
 
-    // Версия с мьютексом
+    // Р’РµСЂСЃРёСЏ СЃ РјСЊСЋС‚РµРєСЃРѕРј
     {
         int counter = 0;
         std::mutex counter_mutex;
@@ -188,7 +156,7 @@ void atomicExample() {
             << ", time: " << duration.count() << " ms\n";
     }
 
-    // Версия с atomic
+    // Р’РµСЂСЃРёСЏ СЃ atomic
     {
         std::atomic<int> counter(0);
         std::vector<std::thread> threads;
@@ -216,7 +184,30 @@ void atomicExample() {
             << ", time: " << duration.count() << " ms\n";
     }
 }
-```
-- Создается счетчик и мьютекс для его защиты
-- Запускаются потоки, каждый увеличивает счетчик
-- Замеряется время выполнения и то же самое повторяется с atomic-счетчиком 
+
+#include <windows.h> // Р”Р»СЏ С†РІРµС‚РЅРѕРіРѕ РІС‹РІРѕРґР° РІ Windows
+
+void printColoredImage(const Image& image, int max_size = 10) {
+    // РћРїСЂРµРґРµР»СЏРµРј СЂР°Р·РјРµСЂ РґР»СЏ РІС‹РІРѕРґР° (РЅРµ Р±РѕР»СЊС€Рµ max_size)
+    int size = 10;
+
+    for (int y = 0; y < size; ++y) {
+        // РўР°РєР¶Рµ РѕРіСЂР°РЅРёС‡РёРІР°РµРј С€РёСЂРёРЅСѓ РІС‹РІРѕРґР°
+        int width = 10;
+
+        for (int x = 0; x < width; ++x) {
+            const Color& c = image[y][x];
+
+            // РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј С†РІРµС‚ РІ РєРѕРЅСЃРѕР»Рё
+            HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+            WORD color = (c.r > 128 ? 4 : 0) | (c.g > 128 ? 2 : 0) | (c.b > 128 ? 1 : 0);
+            SetConsoleTextAttribute(hConsole, color);
+            SetConsoleOutputCP(CP_UTF8);
+            std::cout << "@";
+        }
+
+        // Р’РѕР·РІСЂР°С‰Р°РµРј СЃС‚Р°РЅРґР°СЂС‚РЅС‹Р№ С†РІРµС‚
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+        std::cout << "\n";
+    }
+}
